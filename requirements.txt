@@ -1,4 +1,5 @@
 flask>=3.0
 requests>=2.31
+gunicorn>=22.0
 # Optional: Claude-phrased answers in Ask NEXA (set ANTHROPIC_API_KEY)
 # anthropic>=1.0

@@ -19,6 +19,14 @@ python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
 The first start seeds 12 months of realistic demo data (8 clients, 6 currencies, with deliberate
 anomalies for the leak detector). Settings → *Reset demo data* regenerates it.
 
+## Deploy to Render
+
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/shivendra2008/nexa)
+
+`render.yaml` defines a free Python web service (gunicorn, Python 3.12). PayPal and Anthropic keys
+are optional and prompted for at deploy time. The free plan's disk is ephemeral, so demo data is
+re-seeded whenever the service restarts, and the service sleeps after ~15 minutes idle.
+
 ## Modes
 
 | Variable | Effect |

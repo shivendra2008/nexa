@@ -157,7 +157,7 @@ def draft_reminder(invoice_id, tone=None):
     if not tone:
         tone = "friendly" if od <= 7 and inv["reminders"] == 0 else "firm" if od <= 30 and inv["reminders"] < 2 else "final"
     amt = _money(inv["total"] - (inv["amount_paid"] or 0), inv["currency"])
-    pay_link = f"{os.environ.get('NEXA_PUBLIC_URL', 'http://localhost:5050')}/pay/{inv['number']}"
+    pay_link = f"{os.environ.get('NEXA_PUBLIC_URL') or os.environ.get('RENDER_EXTERNAL_URL', 'http://localhost:5050')}/pay/{inv['number']}"
     first = inv["customer"].split()[0]
     status_line = (f"was due on {inv['due_date']} ({od} days ago)" if od > 0 else f"is due on {inv['due_date']}")
     if tone == "friendly":
