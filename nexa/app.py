@@ -49,7 +49,8 @@ def meta():
     last = db.query("SELECT * FROM agent_runs ORDER BY id DESC LIMIT 1", one=True)
     return ok({"settings": db.get_settings(), "paypal_mode": paypal.mode(), "ai_mode": "claude" if assistant.llm_enabled() else "engine",
                "model": assistant.MODEL if assistant.llm_enabled() else None, "today": date.today().isoformat(),
-               "agent": {"interval": AGENT_INTERVAL, "last_run": last}, "currencies": db.FX_TO_USD})
+               "agent": {"interval": AGENT_INTERVAL, "last_run": last}, "currencies": db.FX_TO_USD,
+               "build": (os.environ.get("RENDER_GIT_COMMIT") or "local")[:7]})
 
 
 @app.post("/api/settings")

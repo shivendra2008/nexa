@@ -1,12 +1,14 @@
 """SQLite storage and deterministic demo-data seeding for NEXA."""
 import os
 import random
+import re
 import sqlite3
 import threading
 from datetime import date, datetime, timedelta
 
 DB_PATH = os.environ.get("NEXA_DB", os.path.join(os.path.dirname(__file__), "..", "data", "nexa.db"))
 _lock = threading.RLock()
+_version = 0  # bumped on every write to business data; engine caches key off it
 
 # Reference FX rates to USD (demo values; replace with a live rates provider in production).
 FX_TO_USD = {"USD": 1.0, "EUR": 1.08, "GBP": 1.27, "INR": 0.012, "CAD": 0.73, "AUD": 0.66, "JPY": 0.0067}
@@ -67,12 +69,23 @@ def query(sql, args=(), one=False):
     return (rows[0] if rows else None) if one else rows
 
 
+def version():
+    return _version
+
+
+def _bump():
+    global _version
+    _version += 1
+
+
 def execute(sql, args=()):
     with _lock:
         conn = connect()
         try:
             cur = conn.execute(sql, args)
             conn.commit()
+            if not re.search(r"\b(alerts|agent_runs)\b", sql):  # agent bookkeeping doesn't change analytics
+                _bump()
             return cur.lastrowid
         finally:
             conn.close()
@@ -246,3 +259,4 @@ def seed(force=False):
             conn.execute("INSERT OR REPLACE INTO settings(key, value) VALUES(?, ?)", (k, v))
         conn.commit()
         conn.close()
+        _bump()

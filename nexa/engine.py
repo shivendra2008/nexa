@@ -4,6 +4,8 @@ Every number here is derived from stored invoices/transactions — nothing is in
 Models are deliberately transparent (weighted factors, moving averages) so each output
 can be explained back to the user.
 """
+import copy
+import functools
 import re
 import statistics
 from collections import defaultdict
@@ -14,8 +16,30 @@ from . import db
 TODAY = date.today
 
 
+def cached(fn):
+    """Memoise until the data changes (db.version) or the day rolls over. Returns copies so callers can't
+    mutate the cache. Keeps request latency low on small CPUs where recomputation dominates."""
+    store = {"key": None, "vals": {}}
+
+    @functools.wraps(fn)
+    def wrapper(*args, **kwargs):
+        stamp = (db.version(), TODAY())
+        if store["key"] != stamp:
+            store["key"], store["vals"] = stamp, {}
+        k = repr((args, sorted(kwargs.items())))
+        if k not in store["vals"]:
+            store["vals"][k] = fn(*args, **kwargs)
+        return copy.deepcopy(store["vals"][k])
+    return wrapper
+
+
+@functools.lru_cache(maxsize=4096)
+def _parse_date(s):
+    return datetime.strptime(s, "%Y-%m-%d").date()
+
+
 def _d(s):
-    return datetime.strptime(s[:10], "%Y-%m-%d").date() if s else None
+    return _parse_date(s[:10]) if s else None
 
 
 def _month_key(d):
@@ -33,6 +57,7 @@ def _add_months(d, n):
 
 # --------------------------------------------------------------------------- loaders
 
+@cached
 def invoices(status=None):
     rows = db.query("""SELECT i.*, c.name AS customer, c.email AS customer_email, c.country
                        FROM invoices i JOIN customers c ON c.id = i.customer_id ORDER BY i.issue_date DESC""")
@@ -68,6 +93,7 @@ def open_invoices():
     return [i for i in invoices() if i["status_view"] in ("sent", "overdue") and i["total"] - i["amount_paid"] > 0.01]
 
 
+@cached
 def transactions(limit=None):
     rows = db.query("""SELECT t.*, c.name AS customer, i.number AS invoice_number FROM transactions t
                        LEFT JOIN customers c ON c.id = t.customer_id LEFT JOIN invoices i ON i.id = t.invoice_id
@@ -81,6 +107,7 @@ def payments():
 
 # --------------------------------------------------------------------------- customers
 
+@cached
 def customer_stats():
     today = TODAY()
     custs = db.query("SELECT * FROM customers ORDER BY name")
@@ -203,6 +230,7 @@ def risk_assessment(inv, cmap=None):
     }
 
 
+@cached
 def at_risk():
     cmap = _customer_map()
     out = []
@@ -221,6 +249,7 @@ def _inv_brief(i):
 
 # --------------------------------------------------------------------------- revenue
 
+@cached
 def revenue_series(period="monthly", n=12):
     today = TODAY()
     pays = payments()
@@ -249,11 +278,13 @@ def revenue_series(period="monthly", n=12):
     return {"period": period, "labels": labels, "values": values, "counts": cnt}
 
 
+@cached
 def month_revenue(year, month):
     key = f"{year:04d}-{month:02d}"
     return round(sum(p["amount_usd"] for p in payments() if p["date"].startswith(key)), 2)
 
 
+@cached
 def rolling_revenue(days, offset=0):
     end = TODAY() - timedelta(days=offset)
     start = end - timedelta(days=days)
@@ -262,6 +293,7 @@ def rolling_revenue(days, offset=0):
 
 # --------------------------------------------------------------------------- summary
 
+@cached
 def summary():
     invs = invoices()
     pend = [i for i in invs if i["status_view"] in ("sent", "overdue")]
@@ -288,6 +320,7 @@ def summary():
 
 # --------------------------------------------------------------------------- forecasting
 
+@cached
 def _baseline_new_business():
     """Weekly expected cash from invoices not yet issued, from the trailing-6-month run-rate of each active client."""
     today = TODAY()
@@ -299,6 +332,7 @@ def _baseline_new_business():
     return {cid: v / 26.0 for cid, v in per_client.items()}  # weekly
 
 
+@cached
 def forecast(days=90, scenario=None):
     """Weekly cash-flow forecast with confidence bands.
 
@@ -366,6 +400,7 @@ def forecast(days=90, scenario=None):
     }
 
 
+@cached
 def currency_exposure():
     exp = defaultdict(lambda: {"received": 0.0, "pending": 0.0, "received_usd": 0.0, "pending_usd": 0.0, "count": 0})
     for p in payments():
@@ -490,6 +525,7 @@ def simulate(text=None, scenario=None, days=90):
 
 # --------------------------------------------------------------------------- health score
 
+@cached
 def health():
     invs = invoices()
     custs = customer_stats()
@@ -540,6 +576,7 @@ def health():
 
 # --------------------------------------------------------------------------- leak detector
 
+@cached
 def leaks():
     today = TODAY()
     invs = invoices()
@@ -676,6 +713,7 @@ def run_agent():
 
 # --------------------------------------------------------------------------- recommendations
 
+@cached
 def recommendations():
     recs = []
     risk = at_risk()
