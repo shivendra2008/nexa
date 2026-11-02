@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>NEXA — AI Commerce Copilot</title>
+  <meta name="description" content="Your Money. Your Decisions. One Intelligent Workspace. AI-powered invoicing, cash-flow forecasting and payment intelligence on PayPal.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/css/base.css">
+  <link rel="stylesheet" href="/static/css/landing.css">
+</head>
+<body>
+  <canvas id="stars" aria-hidden="true"></canvas>
+  <div class="cursor-glow" aria-hidden="true"></div>
+  <div class="progress" aria-hidden="true"><span></span></div>
+
+  <header class="nav">
+    <a href="/" class="logo"><span class="logo-mark"></span>NEXA</a>
+    <nav class="nav-links">
+      <a href="#features">Features</a>
+      <a href="#how">How it works</a>
+      <a href="#simulator">Simulator</a>
+      <a href="#trust">Trust</a>
+    </nav>
+    <a href="/app" class="btn primary sm magnetic">Launch app <span aria-hidden="true">→</span></a>
+  </header>
+
+  <!-- ============================== HERO ============================== -->
+  <section class="hero" id="top">
+    <div class="aurora" aria-hidden="true">
+      <span class="blob b1" data-depth="-0.15"></span>
+      <span class="blob b2" data-depth="-0.3"></span>
+      <span class="blob b3" data-depth="-0.08"></span>
+    </div>
+    <div class="grid-floor" aria-hidden="true"></div>
+
+    <div class="hero-copy">
+      <span class="pill reveal"><span class="dot"></span> AI Commerce Copilot · Built on PayPal</span>
+      <h1 class="hero-title">
+        <span class="line"><span class="word">Your Money.</span></span>
+        <span class="line"><span class="word">Your Decisions.</span></span>
+        <span class="line"><span class="word grad-text">One Intelligent Workspace.</span></span>
+      </h1>
+      <p class="hero-sub reveal">NEXA turns invoices and PayPal payments into decisions — predicting late payments, forecasting cash flow and drafting the follow-ups for you.</p>
+      <div class="hero-cta reveal">
+        <a href="/app" class="btn primary magnetic">Open the Command Center <span aria-hidden="true">→</span></a>
+        <a href="#simulator" class="btn ghost magnetic">Try the What-If simulator</a>
+      </div>
+    </div>
+
+    <div class="hero-stage" aria-hidden="true">
+      <div class="float-card fc-main" data-depth="0.35" data-scroll="-0.18">
+        <div class="fc-head"><span>Revenue · last 12 months</span><span class="chip up">+23.4%</span></div>
+        <div class="fc-value" data-count="210878" data-prefix="$">$0</div>
+        <svg viewBox="0 0 300 90" class="spark">
+          <defs>
+            <linearGradient id="sg" x1="0" x2="0" y1="0" y2="1">
+              <stop offset="0" stop-color="#A78BFA" stop-opacity=".55"/><stop offset="1" stop-color="#7C3AED" stop-opacity="0"/>
+            </linearGradient>
+          </defs>
+          <path class="spark-fill" d="M0,70 C25,62 40,66 60,52 S100,58 120,40 S160,48 180,30 S220,38 240,22 S280,18 300,8 L300,90 L0,90Z" fill="url(#sg)"/>
+          <path class="spark-line" d="M0,70 C25,62 40,66 60,52 S100,58 120,40 S160,48 180,30 S220,38 240,22 S280,18 300,8" fill="none" stroke="#A78BFA" stroke-width="2.5"/>
+        </svg>
+      </div>
+      <div class="float-card fc-ai" data-depth="0.6" data-scroll="-0.35">
+        <div class="ai-badge">✦ NEXA Insight</div>
+        <p>Two invoices may be delayed based on historical payment patterns. Review them to protect <b>$4,120</b> of projected cash flow.</p>
+        <div class="ai-bar"><span style="--w:72%"></span></div>
+      </div>
+      <div class="float-card fc-health" data-depth="0.8" data-scroll="-0.5">
+        <svg viewBox="0 0 80 80" class="ring">
+          <circle cx="40" cy="40" r="32" class="ring-bg"/>
+          <circle cx="40" cy="40" r="32" class="ring-fg" style="--p:.78"/>
+        </svg>
+        <div><div class="muted xs">Health indicator</div><div class="big">78 <small>/100</small></div><div class="ok xs">Stable</div></div>
+      </div>
+      <div class="float-card fc-paid" data-depth="1.0" data-scroll="-0.7">
+        <span class="pp">P</span>
+        <div><div class="xs muted">PayPal · just now</div><b>+$2,450.00</b> from Acme Robotics</div>
+        <span class="check">✓</span>
+      </div>
+      <div class="float-card fc-alert" data-depth="0.5" data-scroll="-0.25">
+        <span class="sev"></span> NX-1062 is 15 days overdue · <u>Draft reminder</u>
+      </div>
+    </div>
+
+    <a href="#features" class="scroll-hint" aria-label="Scroll"><span></span></a>
+  </section>
+
+  <!-- ============================== MARQUEE ============================== -->
+  <div class="marquee" aria-hidden="true">
+    <div class="track">
+      <span>Smart Invoice Studio</span><i>✦</i><span>Payment Intelligence</span><i>✦</i><span>Cash-Flow Forecasting</span><i>✦</i>
+      <span>Ask NEXA</span><i>✦</i><span>Payment Recovery</span><i>✦</i><span>What-If Simulator</span><i>✦</i><span>Revenue Leak Detector</span><i>✦</i>
+      <span>Multi-Currency</span><i>✦</i><span>Smart Invoice Studio</span><i>✦</i><span>Payment Intelligence</span><i>✦</i><span>Cash-Flow Forecasting</span><i>✦</i>
+      <span>Ask NEXA</span><i>✦</i><span>Payment Recovery</span><i>✦</i><span>What-If Simulator</span><i>✦</i><span>Revenue Leak Detector</span><i>✦</i>
+      <span>Multi-Currency</span><i>✦</i>
+    </div>
+  </div>
+
+  <!-- ============================== PROBLEM / STATS ============================== -->
+  <section class="section stats">
+    <div class="section-head reveal">
+      <span class="eyebrow">The problem</span>
+      <h2>Payments are data. <span class="grad-text">Most tools just show it.</span></h2>
+      <p>Freelancers and small teams lose hours to manual follow-ups and still get surprised by cash-flow gaps.</p>
+    </div>
+    <div class="stat-grid">
+      <div class="stat reveal tilt"><div class="num" data-count="8" data-suffix=" hrs">0</div><p>a month spent chasing invoices by hand</p></div>
+      <div class="stat reveal tilt"><div class="num" data-count="61" data-suffix="%">0</div><p>of small businesses say cash flow is their top worry</p></div>
+      <div class="stat reveal tilt"><div class="num" data-count="14" data-suffix=" days">0</div><p>average lateness from a habitually slow client</p></div>
+      <div class="stat reveal tilt"><div class="num" data-count="0" data-suffix=" surprises">0</div><p>when NEXA watches your receivables for you</p></div>
+    </div>
+    <p class="fineprint reveal">Illustrative figures for the prototype narrative.</p>
+  </section>
+
+  <!-- ============================== FEATURES (sticky horizontal) ============================== -->
+  <section class="hscroll" id="features">
+    <div class="hscroll-sticky">
+      <div class="hscroll-head">
+        <span class="eyebrow">What NEXA does</span>
+        <h2>From transactions to <span class="grad-text">decisions</span>.</h2>
+      </div>
+      <div class="hscroll-track">
+        <article class="feat tilt"><div class="feat-ico">🧾</div><h3>Smart Invoice Studio</h3><p>“Invoice Acme $750 for website design, due in 14 days.” NEXA drafts it, suggests terms from the client's history, you approve, PayPal sends it.</p><span class="tag">Natural language</span></article>
+        <article class="feat tilt"><div class="feat-ico">🛰️</div><h3>Proactive AI Agent</h3><p>Continuously scans payments, overdue invoices and forecast shifts — and tells you before it becomes a problem.</p><span class="tag">Always on</span></article>
+        <article class="feat tilt"><div class="feat-ico">🔍</div><h3>Explainable risk</h3><p>No black-box scores. Every flagged invoice shows the factors behind it: history, trend, size, follow-ups.</p><span class="tag">Transparent</span></article>
+        <article class="feat tilt"><div class="feat-ico">💌</div><h3>Payment Recovery</h3><p>Personalised friendly → firm → final reminders with suggested timing and a PayPal pay link. Nothing sends without you.</p><span class="tag">Human-approved</span></article>
+        <article class="feat tilt"><div class="feat-ico">🌊</div><h3>Cash-Flow Forecasting</h3><p>Risk-weighted weekly projections with confidence bands. Ask “what if my largest client pays two weeks late?”</p><span class="tag">What-if</span></article>
+        <article class="feat tilt"><div class="feat-ico">🩺</div><h3>Health Indicator</h3><p>Collection, consistency, concentration, delays — six transparent signals, never a credit rating.</p><span class="tag">Operational</span></article>
+        <article class="feat tilt"><div class="feat-ico">🕳️</div><h3>Revenue Leak Detector</h3><p>Finds paid-but-open invoices, short payments, duplicates and missed follow-ups hiding in your records.</p><span class="tag">Reconciliation</span></article>
+        <article class="feat tilt"><div class="feat-ico">🌍</div><h3>Multi-Currency</h3><p>USD, EUR, GBP, INR, CAD, AUD — consolidated reporting and FX shock scenarios.</p><span class="tag">Global</span></article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================== HOW ============================== -->
+  <section class="section how" id="how">
+    <div class="section-head reveal">
+      <span class="eyebrow">How it works</span>
+      <h2>Four steps. <span class="grad-text">Zero spreadsheets.</span></h2>
+    </div>
+    <div class="steps">
+      <svg class="steps-line" viewBox="0 0 4 100" preserveAspectRatio="none" aria-hidden="true"><line x1="2" y1="0" x2="2" y2="100"/></svg>
+      <div class="step reveal"><span class="step-n">01</span><div><h3>Connect PayPal</h3><p>Sandbox or live credentials. Invoices and payments flow in.</p></div></div>
+      <div class="step reveal"><span class="step-n">02</span><div><h3>NEXA learns your clients</h3><p>Payment timing, consistency and trend for every customer.</p></div></div>
+      <div class="step reveal"><span class="step-n">03</span><div><h3>Get proactive insights</h3><p>Risk flags, leak detection and forecasts — each one explained.</p></div></div>
+      <div class="step reveal"><span class="step-n">04</span><div><h3>Act with one click</h3><p>Approve a reminder, send an invoice, simulate a decision.</p></div></div>
+    </div>
+  </section>
+
+  <!-- ============================== SIMULATOR TEASER ============================== -->
+  <section class="section sim" id="simulator">
+    <div class="sim-card reveal">
+      <div class="sim-left">
+        <span class="eyebrow">What-If Simulator</span>
+        <h2>What if your largest client pays <span class="grad-text" id="simDaysLabel">14 days</span> late?</h2>
+        <p>Drag the slider. This preview runs on live demo data from the NEXA backend.</p>
+        <input type="range" min="0" max="45" value="14" id="simDays" aria-label="Days late">
+        <div class="sim-stats">
+          <div><span class="muted xs">Ending balance (90d)</span><b id="simEnd">—</b></div>
+          <div><span class="muted xs">Change</span><b id="simDelta">—</b></div>
+          <div><span class="muted xs">Confidence</span><b id="simConf">—</b></div>
+        </div>
+      </div>
+      <div class="sim-right">
+        <svg viewBox="0 0 400 220" id="simChart" preserveAspectRatio="none">
+          <path id="simBase" fill="none" stroke="rgba(167,139,250,.45)" stroke-width="2" stroke-dasharray="5 5"/>
+          <path id="simArea" fill="url(#simGrad)"/>
+          <path id="simLine" fill="none" stroke="#A78BFA" stroke-width="3"/>
+          <defs><linearGradient id="simGrad" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#7C3AED" stop-opacity=".5"/><stop offset="1" stop-color="#7C3AED" stop-opacity="0"/></linearGradient></defs>
+        </svg>
+        <div class="legend"><span><i class="l1"></i>Scenario</span><span><i class="l2"></i>Baseline</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================== TRUST ============================== -->
+  <section class="section trust" id="trust">
+    <div class="section-head reveal">
+      <span class="eyebrow">Built on trust</span>
+      <h2>AI that shows its work.</h2>
+    </div>
+    <div class="trust-grid">
+      <div class="trust-item reveal tilt"><h3>Grounded answers</h3><p>Ask NEXA only answers from your actual records — no invented numbers.</p></div>
+      <div class="trust-item reveal tilt"><h3>You confirm every action</h3><p>Invoices, reminders and payments require explicit approval.</p></div>
+      <div class="trust-item reveal tilt"><h3>Server-side verification</h3><p>PayPal captures are verified for amount and currency before the dashboard updates.</p></div>
+    </div>
+  </section>
+
+  <section class="cta">
+    <div class="cta-inner reveal">
+      <h2>Stop chasing. <span class="grad-text">Start deciding.</span></h2>
+      <a href="/app" class="btn primary magnetic big">Launch NEXA <span aria-hidden="true">→</span></a>
+    </div>
+  </section>
+
+  <footer class="foot">
+    <span class="logo"><span class="logo-mark"></span>NEXA</span>
+    <span class="muted">Prototype · PayPal Sandbox · Not financial advice</span>
+  </footer>
+
+  <script src="/static/js/landing.js"></script>
+</body>
+</html>

@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Pay invoice {{ number }} · NEXA Checkout</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/css/base.css">
+  <style>
+    body { min-height: 100vh; display: grid; place-items: center; padding: 40px 16px; overflow-x: hidden; }
+    .orb { position: fixed; border-radius: 50%; filter: blur(100px); opacity: .45; z-index: 0; animation: f 14s ease-in-out infinite; }
+    .orb.a { width: 520px; height: 520px; background: #7C3AED; top: -200px; left: -160px; }
+    .orb.b { width: 420px; height: 420px; background: #1E40AF; bottom: -200px; right: -120px; animation-direction: reverse; }
+    @keyframes f { 50% { transform: translate(60px, 40px); } }
+    .wrap { position: relative; z-index: 1; width: min(980px, 100%); display: grid; grid-template-columns: 1.1fr 1fr; gap: 22px; perspective: 1400px; }
+    .card { background: linear-gradient(165deg, rgba(36, 30, 66, .95), rgba(29, 24, 53, .95)); border: 1px solid var(--line-2); border-radius: 22px; padding: 28px;
+      box-shadow: 0 40px 100px -40px #000; animation: in 1s var(--ease) both; transform-style: preserve-3d; transition: transform .6s var(--ease); }
+    .card:nth-child(2) { animation-delay: .12s; }
+    @keyframes in { from { opacity: 0; transform: translateY(30px) rotateX(-8deg); } }
+    h1 { font-family: var(--display); margin: 6px 0 2px; font-size: 26px; }
+    .muted { color: var(--muted); } .t2 { color: var(--text-2); } .xs { font-size: 12px; }
+    .amt { font-family: var(--display); font-size: 46px; font-weight: 700; letter-spacing: -.02em; margin: 16px 0 4px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 18px; font-size: 14px; }
+    td { padding: 10px 0; border-bottom: 1px solid var(--line); } td:last-child { text-align: right; }
+    .chip { display: inline-flex; gap: 6px; align-items: center; padding: 3px 10px; border-radius: 99px; font-size: 12px; font-weight: 600; }
+    .chip.overdue { color: #FB7185; background: rgba(244, 63, 94, .13); } .chip.sent { color: #93C5FD; background: rgba(56, 189, 248, .12); }
+    .chip.paid { color: #4ADE80; background: rgba(34, 197, 94, .12); }
+    .secure { display: flex; gap: 10px; align-items: center; font-size: 12px; color: var(--muted); margin-top: 16px; }
+    .pp-btn { width: 100%; height: 50px; border-radius: 26px; border: 0; cursor: pointer; background: #FFC439; color: #003087; font-weight: 800; font-size: 18px; font-style: italic;
+      display: flex; align-items: center; justify-content: center; gap: 2px; transition: transform .3s var(--ease), filter .3s; }
+    .pp-btn:hover { filter: brightness(1.05); transform: translateY(-2px); }
+    .pp-btn span { color: #009CDE; }
+    .pp-card { margin-top: 10px; width: 100%; height: 46px; border-radius: 26px; border: 1px solid #ccc; background: #2C2E2F; color: #fff; font-weight: 600; cursor: pointer; }
+    #status { margin-top: 18px; }
+    .steps { display: grid; gap: 10px; margin-top: 18px; }
+    .st { display: flex; gap: 12px; align-items: center; font-size: 14px; color: var(--muted); transition: color .4s; }
+    .st i { width: 24px; height: 24px; border-radius: 50%; border: 2px solid var(--line-2); display: grid; place-items: center; font-style: normal; font-size: 12px; transition: all .4s var(--ease); }
+    .st.done { color: #fff; } .st.done i { background: var(--success); border-color: var(--success); }
+    .st.run i { border-color: var(--accent); border-top-color: transparent; animation: sp .8s linear infinite; }
+    @keyframes sp { to { transform: rotate(360deg); } }
+    .success { text-align: center; padding: 10px 0; }
+    .tick { width: 84px; height: 84px; margin: 0 auto 14px; border-radius: 50%; background: rgba(34, 197, 94, .15); display: grid; place-items: center; animation: pop .7s var(--ease) both; }
+    .tick svg { width: 44px; } .tick path { stroke: var(--success); stroke-width: 4; fill: none; stroke-dasharray: 60; stroke-dashoffset: 60; animation: draw .8s .3s var(--ease) forwards; }
+    @keyframes pop { from { transform: scale(0); } } @keyframes draw { to { stroke-dashoffset: 0; } }
+    .ref { font-family: ui-monospace, Menlo, monospace; background: rgba(13, 11, 31, .6); padding: 10px; border-radius: 10px; border: 1px solid var(--line); font-size: 13px; margin: 12px 0; word-break: break-all; }
+    /* simulated PayPal popup */
+    .ppwin { position: fixed; inset: 0; z-index: 50; display: grid; place-items: center; background: rgba(5, 4, 15, .65); backdrop-filter: blur(6px); opacity: 0; transition: opacity .3s; }
+    .ppwin.show { opacity: 1; }
+    .ppbox { width: min(400px, calc(100% - 32px)); background: #fff; color: #2C2E2F; border-radius: 16px; padding: 26px; transform: scale(.94); transition: transform .4s var(--ease); }
+    .ppwin.show .ppbox { transform: none; }
+    .ppbox h3 { margin: 0 0 4px; color: #003087; font-style: italic; font-size: 24px; } .ppbox h3 span { color: #009CDE; }
+    .ppbox .row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #eee; font-size: 14px; }
+    .ppbox button { width: 100%; height: 46px; border-radius: 24px; border: 0; background: #0070BA; color: #fff; font-weight: 700; font-size: 15px; cursor: pointer; margin-top: 16px; }
+    .ppbox .cancel { background: none; color: #0070BA; margin-top: 6px; }
+    .demo { font-size: 11px; background: #FEF3C7; color: #92400E; padding: 6px 10px; border-radius: 8px; margin-bottom: 14px; }
+    @media (max-width: 780px) { .wrap { grid-template-columns: 1fr; } }
+  </style>
+  {% if client_id %}<script src="https://www.paypal.com/sdk/js?client-id={{ client_id }}&currency={{ currency }}&intent=capture&components=buttons"></script>{% endif %}
+</head>
+<body>
+  <span class="orb a"></span><span class="orb b"></span>
+  <div class="wrap">
+    <section class="card" id="inv"><div class="muted">Loading invoice…</div></section>
+    <section class="card">
+      <span class="logo"><span class="logo-mark"></span>NEXA <span class="muted xs" style="letter-spacing:0;font-weight:500">Checkout</span></span>
+      <div id="payArea" style="margin-top:22px"></div>
+      <div id="status"></div>
+      <div class="secure">🔒 Payments are processed by PayPal{{ " Sandbox" if mode == "sandbox" else " (demo mode — simulated sandbox)" }}. NEXA verifies the amount and currency server-side before marking the invoice paid.</div>
+    </section>
+  </div>
+<script>
+const NUMBER = {{ number|tojson }}, MODE = {{ mode|tojson }};
+const $ = s => document.querySelector(s);
+const SYM = { USD: "$", EUR: "€", GBP: "£", INR: "₹", CAD: "C$", AUD: "A$", JPY: "¥" };
+const money = (v, c) => (SYM[c] || c + " ") + Number(v).toLocaleString(undefined, { minimumFractionDigits: ["INR","JPY"].includes(c) ? 0 : 2, maximumFractionDigits: ["INR","JPY"].includes(c) ? 0 : 2 });
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+let INV;
+
+async function post(url, body) {
+  const r = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body || {}) });
+  const j = await r.json(); if (!j.ok) throw new Error(j.error); return j.data;
+}
+function steps(active) {
+  const names = ["Order created", "Approved by payer", "Captured by PayPal", "Verified by NEXA"];
+  $("#status").innerHTML = `<div class="steps">${names.map((n, i) => `<div class="st ${i < active ? "done" : i === active ? "run" : ""}"><i>${i < active ? "✓" : ""}</i>${n}</div>`).join("")}</div>`;
+}
+function success(res) {
+  $("#payArea").innerHTML = `<div class="success"><div class="tick"><svg viewBox="0 0 50 50"><path d="M12 26l9 9 18-20"/></svg></div>
+    <h1>Payment complete</h1><p class="t2">${money(res.amount, res.currency)} paid for invoice ${esc(NUMBER)}.</p>
+    <div class="muted xs">Transaction reference</div><div class="ref">${esc(res.capture_id)}</div><div class="muted xs">Order ${esc(res.order_id)} · status ${esc(res.status)}</div>
+    <a class="btn primary" href="/app#overview" style="margin-top:18px">View updated dashboard →</a></div>`;
+  $("#status").innerHTML = ""; loadInvoice();
+}
+async function capture(orderId) {
+  steps(2);
+  try {
+    const res = await post(`/api/paypal/orders/${orderId}/capture`);
+    steps(4); setTimeout(() => success(res), 600);
+  } catch (e) { $("#status").innerHTML = `<p style="color:#FB7185">Payment failed: ${esc(e.message)}</p>`; }
+}
+function simulatedPopup(order) {
+  const w = document.createElement("div"); w.className = "ppwin";
+  w.innerHTML = `<div class="ppbox"><div class="demo">Demo mode · simulated PayPal Sandbox approval</div><h3>Pay<span>Pal</span></h3>
+    <div class="muted" style="color:#666;font-size:13px;margin-bottom:12px">Logged in as sandbox-buyer@personal.example.com</div>
+    <div class="row"><span>Pay to</span><b>${esc(INV.business)}</b></div><div class="row"><span>Invoice</span><b>${esc(NUMBER)}</b></div>
+    <div class="row"><span>Amount</span><b>${money(INV.total - (INV.amount_paid || 0), INV.currency)}</b></div><div class="row"><span>Funding</span><b>PayPal balance (sandbox)</b></div>
+    <button id="ppOk">Complete Purchase</button><button class="cancel" id="ppNo">Cancel and return</button></div>`;
+  document.body.appendChild(w); requestAnimationFrame(() => w.classList.add("show"));
+  const close = () => { w.classList.remove("show"); setTimeout(() => w.remove(), 300); };
+  w.querySelector("#ppNo").onclick = () => { close(); $("#status").innerHTML = '<p class="muted">Payment cancelled.</p>'; };
+  w.querySelector("#ppOk").onclick = async () => { close(); steps(1); await post(`/api/paypal/orders/${order.id}/approve-sim`); capture(order.id); };
+}
+function renderPay() {
+  if (INV.status_view === "paid") {
+    $("#payArea").innerHTML = `<div class="success"><div class="tick"><svg viewBox="0 0 50 50"><path d="M12 26l9 9 18-20"/></svg></div><h1>Already paid</h1>
+      ${INV.payment ? `<p class="t2">Paid ${esc(INV.payment.date)}</p><div class="muted xs">Reference</div><div class="ref">${esc(INV.payment.reference)}</div>` : ""}</div>`; return;
+  }
+  $("#payArea").innerHTML = `<div class="muted xs">Amount due</div><div class="amt">${money(INV.total - (INV.amount_paid || 0), INV.currency)}</div><div class="t2" style="margin-bottom:20px">to ${esc(INV.business)}</div><div id="pp"></div>`;
+  if (window.paypal && MODE === "sandbox") {
+    paypal.Buttons({
+      style: { shape: "pill", color: "gold", label: "pay" },
+      createOrder: async () => { steps(0); return (await post("/api/paypal/orders", { invoice: NUMBER })).id; },
+      onApprove: data => { steps(1); return capture(data.orderID); },
+      onError: err => { $("#status").innerHTML = `<p style="color:#FB7185">${esc(err.message || err)}</p>`; },
+    }).render("#pp");
+  } else {
+    $("#pp").innerHTML = `<button class="pp-btn" id="ppGo">Pay<span>Pal</span></button><button class="pp-card" id="ppCard">Debit or Credit Card</button>`;
+    const start = async () => {
+      steps(0);
+      try { const o = await post("/api/paypal/orders", { invoice: NUMBER }); setTimeout(() => simulatedPopup(o), 400); }
+      catch (e) { $("#status").innerHTML = `<p style="color:#FB7185">${esc(e.message)}</p>`; }
+    };
+    $("#ppGo").onclick = start; $("#ppCard").onclick = start;
+  }
+}
+async function loadInvoice() {
+  const j = await (await fetch("/api/public/invoice/" + encodeURIComponent(NUMBER))).json();
+  if (!j.ok) { $("#inv").innerHTML = "<h1>Invoice not found</h1>"; return; }
+  const first = !INV; INV = j.data;
+  const disc = INV.subtotal * INV.discount / 100, tax = (INV.subtotal - disc) * INV.tax_rate / 100;
+  $("#inv").innerHTML = `<div class="muted xs">Invoice from</div><h1>${esc(INV.business)}</h1>
+    <div style="margin-top:8px"><span class="chip ${INV.status_view}">${INV.status_view === "overdue" ? `Overdue · ${INV.days_overdue} days` : INV.status_view}</span></div>
+    <table><tr><td class="muted">Invoice</td><td><b>${esc(INV.number)}</b></td></tr><tr><td class="muted">Billed to</td><td>${esc(INV.customer)}</td></tr>
+    <tr><td class="muted">Issued</td><td>${esc(INV.issue_date)}</td></tr><tr><td class="muted">Due</td><td>${esc(INV.due_date)}</td></tr>
+    <tr><td>${esc(INV.description)}</td><td>${money(INV.subtotal, INV.currency)}</td></tr>
+    ${INV.discount ? `<tr><td class="muted">Discount ${INV.discount}%</td><td>−${money(disc, INV.currency)}</td></tr>` : ""}
+    ${INV.tax_rate ? `<tr><td class="muted">Tax ${INV.tax_rate}%</td><td>${money(tax, INV.currency)}</td></tr>` : ""}
+    ${INV.amount_paid ? `<tr><td class="muted">Already paid</td><td>−${money(INV.amount_paid, INV.currency)}</td></tr>` : ""}
+    <tr><td><b>Total</b></td><td><b style="font-size:18px">${money(INV.total, INV.currency)}</b></td></tr></table>`;
+  if (first) renderPay();
+}
+document.querySelectorAll(".card").forEach(c => c.addEventListener("pointermove", e => {
+  const r = c.getBoundingClientRect(); c.style.transform = `rotateY(${((e.clientX - r.left) / r.width - .5) * 4}deg) rotateX(${-((e.clientY - r.top) / r.height - .5) * 4}deg)`;
+}));
+document.querySelectorAll(".card").forEach(c => c.addEventListener("pointerleave", () => c.style.transform = ""));
+loadInvoice();
+</script>
+</body>
+</html>
