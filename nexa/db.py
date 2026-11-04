@@ -6,7 +6,9 @@ import sqlite3
 import threading
 from datetime import date, datetime, timedelta
 
-DB_PATH = os.environ.get("NEXA_DB", os.path.join(os.path.dirname(__file__), "..", "data", "nexa.db"))
+# Serverless hosts (Vercel) only allow writes under /tmp; the demo DB is re-seeded on each cold start there.
+_DEFAULT_DB = "/tmp/nexa.db" if os.environ.get("VERCEL") else os.path.join(os.path.dirname(__file__), "..", "data", "nexa.db")
+DB_PATH = os.environ.get("NEXA_DB", _DEFAULT_DB)
 _lock = threading.RLock()
 _version = 0  # bumped on every write to business data; engine caches key off it
 

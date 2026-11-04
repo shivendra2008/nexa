@@ -11,6 +11,8 @@ from . import assistant, db, engine, paypal, reports
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 app = Flask(__name__, template_folder=os.path.join(ROOT, "templates"), static_folder=os.path.join(ROOT, "static"))
 AGENT_INTERVAL = int(os.environ.get("NEXA_AGENT_INTERVAL", "45"))
+# Serverless functions can't keep a background thread alive, so the agent scans on demand instead.
+SERVERLESS = bool(os.environ.get("VERCEL"))
 
 
 def ok(data=None, **kw):
@@ -240,8 +242,17 @@ def currency():
 
 # --------------------------------------------------------------------------- alerts & agent
 
+def _agent_if_stale():
+    if not SERVERLESS:
+        return
+    last = db.query("SELECT ran_at FROM agent_runs ORDER BY id DESC LIMIT 1", one=True)
+    if not last or (datetime.now() - datetime.fromisoformat(last["ran_at"])).total_seconds() >= AGENT_INTERVAL:
+        engine.run_agent()
+
+
 @app.get("/api/alerts")
 def alerts():
+    _agent_if_stale()
     rows = db.query("SELECT * FROM alerts WHERE dismissed=0 ORDER BY created_at DESC, id DESC")
     last = db.query("SELECT * FROM agent_runs ORDER BY id DESC LIMIT 1", one=True)
     runs = db.query("SELECT COUNT(*) AS n FROM agent_runs", one=True)["n"]
@@ -351,6 +362,9 @@ def pp_approve_sim(oid):
 @app.post("/api/paypal/orders/<oid>/capture")
 def pp_capture(oid):
     inv = db.query("SELECT * FROM invoices WHERE paypal_order_id=?", (oid,), one=True)
+    sim = paypal.parse_simulated(oid) if oid.startswith("SIM-") else None
+    if not inv and sim:  # order created on another serverless instance
+        inv = db.query("SELECT * FROM invoices WHERE number=?", (sim["invoice"],), one=True)
     if not inv:
         return err("Order not linked to an invoice", 404)
     res = paypal.capture_order(oid)
@@ -395,5 +409,8 @@ def start_agent():
 
 def create_app():
     db.seed()
-    start_agent()
+    if SERVERLESS:
+        engine.run_agent()
+    else:
+        start_agent()
     return app

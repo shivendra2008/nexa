@@ -4,6 +4,10 @@ Live sandbox mode: set PAYPAL_CLIENT_ID and PAYPAL_CLIENT_SECRET (from developer
 Demo mode (no credentials): orders/captures are simulated locally with the same response shape so the
 full checkout → verification → dashboard-update flow can be exercised offline.
 """
+import base64
+import hashlib
+import hmac
+import json
 import os
 import secrets
 import time
@@ -13,7 +17,9 @@ import requests
 BASE = os.environ.get("PAYPAL_API_BASE", "https://api-m.sandbox.paypal.com")
 NO_DECIMAL = {"JPY", "HUF", "TWD"}
 _token = {"value": None, "exp": 0}
-_sim_orders = {}
+# Demo-mode orders are signed and self-describing, so any server instance can approve and capture them
+# (serverless hosts don't share memory between requests).
+_SIM_KEY = os.environ.get("NEXA_SECRET", "nexa-demo-mode").encode()
 
 
 def client_id():
@@ -51,10 +57,10 @@ def _h():
 def create_order(invoice):
     amount = _fmt(invoice["total"] - (invoice.get("amount_paid") or 0), invoice["currency"])
     if not live():
-        oid = "SIM-" + secrets.token_hex(8).upper()
-        _sim_orders[oid] = {"id": oid, "status": "CREATED", "amount": amount, "currency": invoice["currency"],
-                            "invoice": invoice["number"]}
-        return {"id": oid, "status": "CREATED"}
+        payload = base64.urlsafe_b64encode(json.dumps(
+            {"n": invoice["number"], "a": amount, "c": invoice["currency"], "t": secrets.token_hex(6)}).encode()).decode().rstrip("=")
+        sig = hmac.new(_SIM_KEY, payload.encode(), hashlib.sha256).hexdigest()[:20]
+        return {"id": f"SIM-{payload}.{sig}", "status": "CREATED"}
     body = {"intent": "CAPTURE", "purchase_units": [{
         "reference_id": invoice["number"], "invoice_id": f"{invoice['number']}-{secrets.token_hex(3)}",
         "description": (invoice.get("description") or "Invoice")[:127],
@@ -64,20 +70,29 @@ def create_order(invoice):
     return r.json()
 
 
+def parse_simulated(order_id):
+    """Return the signed demo order's contents, or None if it is malformed or tampered with."""
+    try:
+        payload, sig = order_id[len("SIM-"):].rsplit(".", 1)
+    except ValueError:
+        return None
+    good = hmac.new(_SIM_KEY, payload.encode(), hashlib.sha256).hexdigest()[:20]
+    if not order_id.startswith("SIM-") or not hmac.compare_digest(sig, good):
+        return None
+    d = json.loads(base64.urlsafe_b64decode(payload + "=" * (-len(payload) % 4)))
+    return {"id": order_id, "status": "APPROVED", "invoice": d["n"], "amount": d["a"], "currency": d["c"]}
+
+
 def approve_simulated(order_id):
-    o = _sim_orders.get(order_id)
-    if o:
-        o["status"] = "APPROVED"
-    return o
+    return parse_simulated(order_id)
 
 
 def capture_order(order_id):
     """Capture and return a normalised, verified result."""
     if not live():
-        o = _sim_orders.get(order_id)
-        if not o or o["status"] != "APPROVED":
+        o = parse_simulated(order_id)
+        if not o:
             return {"ok": False, "error": "Order not approved"}
-        o["status"] = "COMPLETED"
         return {"ok": True, "status": "COMPLETED", "order_id": order_id,
                 "capture_id": "CAP-" + secrets.token_hex(8).upper(), "amount": float(o["amount"]),
                 "currency": o["currency"], "reference": o["invoice"], "payer": "sandbox-buyer@personal.example.com"}

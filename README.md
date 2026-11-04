@@ -19,6 +19,16 @@ python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
 The first start seeds 12 months of realistic demo data (8 clients, 6 currencies, with deliberate
 anomalies for the leak detector). Settings → *Reset demo data* regenerates it.
 
+## Deploy to Vercel
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/shivendra2008/nexa)
+
+`api/index.py` exposes the Flask app as a Python serverless function and `vercel.json` routes every
+path to it. On Vercel the SQLite demo DB lives in `/tmp` and is re-seeded on each cold start, and the
+proactive agent scans on demand (when alerts are fetched) instead of on a background thread. Separate
+function instances don't share data, so changes such as a payment may not appear on every request;
+use a hosted database for anything beyond a demo.
+
 ## Deploy to Render
 
 [![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/shivendra2008/nexa)
