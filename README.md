@@ -23,8 +23,8 @@ anomalies for the leak detector). Settings → *Reset demo data* regenerates it.
 
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/shivendra2008/nexa)
 
-`api/index.py` exposes the Flask app as a Python serverless function and `vercel.json` routes every
-path to it. On Vercel the SQLite demo DB lives in `/tmp` and is re-seeded on each cold start, and the
+Vercel's zero-config Flask support serves the `app` in the root `app.py`; static assets in
+`public/static` go straight to Vercel's CDN. On Vercel the SQLite demo DB lives in `/tmp` and is re-seeded on each cold start, and the
 proactive agent scans on demand (when alerts are fetched) instead of on a background thread. Separate
 function instances don't share data, so changes such as a payment may not appear on every request;
 use a hosted database for anything beyond a demo.
@@ -56,7 +56,7 @@ nexa/
   reports.py    daily / weekly / monthly / outstanding / customer / cash-flow reports + CSV
   paypal.py     PayPal REST client (sandbox) with demo-mode simulation
   app.py        Flask routes, approval guards, capture verification, background agent thread
-templates/ static/   landing page, dashboard SPA (vanilla JS + Chart.js), checkout
+templates/ public/static/   landing page, dashboard SPA (vanilla JS + Chart.js), checkout
 ```
 
 Safety rails: invoices require `approved: true`, reminders require `confirm: true`, and PayPal

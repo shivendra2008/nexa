@@ -9,7 +9,7 @@ from flask import Flask, Response, abort, jsonify, render_template, request
 from . import assistant, db, engine, paypal, reports
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-app = Flask(__name__, template_folder=os.path.join(ROOT, "templates"), static_folder=os.path.join(ROOT, "static"))
+app = Flask(__name__, template_folder=os.path.join(ROOT, "templates"), static_folder=os.path.join(ROOT, "public", "static"), static_url_path="/static")
 AGENT_INTERVAL = int(os.environ.get("NEXA_AGENT_INTERVAL", "45"))
 # Serverless functions can't keep a background thread alive, so the agent scans on demand instead.
 SERVERLESS = bool(os.environ.get("VERCEL"))
